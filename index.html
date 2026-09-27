@@ -1,0 +1,1064 @@
+
+html_content = '''<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тайны Союзов - Квест</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .font-russo {
+            font-family: 'Russo One', sans-serif;
+        }
+
+        /* Виньетка */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            background: radial-gradient(circle at center, transparent 50%, rgba(0, 0, 0, 0.7) 100%);
+        }
+
+        /* Неоновые эффекты */
+        .neon-text {
+            text-shadow: 
+                0 0 5px #10b981,
+                0 0 10px #10b981,
+                0 0 20px #10b981,
+                0 0 40px #059669;
+        }
+
+        .neon-gold {
+            text-shadow: 
+                0 0 5px #fbbf24,
+                0 0 10px #fbbf24,
+                0 0 20px #f59e0b;
+        }
+
+        .neon-border {
+            box-shadow: 
+                0 0 5px #10b981,
+                0 0 10px #10b981,
+                inset 0 0 5px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Анимации */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse-neon {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px #10b981, 0 0 10px #10b981; }
+            50% { box-shadow: 0 0 10px #10b981, 0 0 20px #10b981, 0 0 30px #059669; }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .animate-pulse-neon {
+            animation: pulse-neon 2s ease-in-out infinite;
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .animate-glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        /* Кнопки */
+        .btn-mystic {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+            border: 2px solid #10b981;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .btn-mystic:hover {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            box-shadow: 0 0 15px #10b981, 0 0 30px rgba(16, 185, 129, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-mystic:active {
+            transform: translateY(0);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+            border: 2px solid #fbbf24;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .btn-gold:hover {
+            background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+            box-shadow: 0 0 15px #fbbf24, 0 0 30px rgba(251, 191, 36, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Карточки заданий */
+        .quest-card {
+            background: rgba(6, 78, 59, 0.3);
+            border: 2px solid #10b981;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Прогресс бар */
+        .progress-container {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #10b981;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            box-shadow: 0 0 10px #10b981;
+            transition: width 0.5s ease;
+        }
+
+        /* Экраны */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Частицы */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #10b981;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Стили для разных типов заданий */
+        .option-btn {
+            background: rgba(6, 78, 59, 0.5);
+            border: 2px solid #10b981;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 44px;
+            padding: 12px;
+        }
+
+        .option-btn:hover {
+            background: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .option-btn.selected {
+            background: rgba(16, 185, 129, 0.5);
+            border-color: #34d399;
+            box-shadow: 0 0 15px #10b981;
+        }
+
+        .option-btn.correct {
+            background: rgba(34, 197, 94, 0.5);
+            border-color: #22c55e;
+        }
+
+        .option-btn.incorrect {
+            background: rgba(239, 68, 68, 0.5);
+            border-color: #ef4444;
+        }
+
+        input[type="text"] {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #10b981;
+            color: #e0e0e0;
+            padding: 12px;
+            font-size: 16px;
+            min-height: 44px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        /* Canvas стили */
+        canvas {
+            border: 2px solid #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Модальное окно награды */
+        .reward-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .reward-modal.active {
+            display: flex;
+        }
+
+        .reward-content {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+            border: 3px solid #fbbf24;
+            padding: 40px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Drag and drop стили */
+        .draggable-item {
+            background: rgba(6, 78, 59, 0.5);
+            border: 2px solid #10b981;
+            padding: 10px;
+            margin: 5px;
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+
+        .draggable-item:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        .drop-zone {
+            border: 2px dashed #10b981;
+            min-height: 50px;
+            padding: 10px;
+            margin: 5px;
+        }
+
+        .drop-zone.drag-over {
+            background: rgba(16, 185, 129, 0.2);
+            border-style: solid;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .screen {
+                padding: 10px;
+            }
+            
+            .quest-card {
+                padding: 15px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Виньетка -->
+    <div class="vignette"></div>
+
+    <!-- Частицы фона -->
+    <div id="particles"></div>
+
+    <!-- ЭКРАН 1: Титульный -->
+    <div id="screen-title" class="screen active">
+        <div class="text-center animate-float">
+            <h1 class="font-russo text-5xl md:text-7xl mb-6 neon-text text-emerald-400">
+                ТАЙНЫ СОЮЗОВ
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 text-gray-300">
+                Квест по русскому языку для 8 класса
+            </p>
+            <div class="mb-8 p-6 quest-card rounded-lg max-w-2xl mx-auto">
+                <p class="text-lg mb-4">
+                    Ты попал в загадочный мир, где слова обрели магическую силу. 
+                    Чтобы выбраться, тебе нужно разгадать тайны подчинительных и сочинительных союзов.
+                </p>
+                <p class="text-sm text-emerald-300">
+                    Пройди 6 испытаний и докажи своё мастерство!
+                </p>
+            </div>
+            <button onclick="showScreen('screen-map')" class="btn-mystic px-8 py-4 rounded-lg text-xl font-bold text-white animate-glow">
+                НАЧАТЬ ПУТЕШЕСТВИЕ
+            </button>
+        </div>
+    </div>
+
+    <!-- ЭКРАН 2: Карта/Локации -->
+    <div id="screen-map" class="screen">
+        <h2 class="font-russo text-4xl md:text-5xl mb-8 neon-gold text-yellow-400 text-center">
+            КАРТА МИРА
+        </h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl w-full mb-8">
+            <div id="level-1" class="quest-card p-4 rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="startLevel(1)">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">🌑</div>
+                    <h3 class="font-russo text-lg text-emerald-400">Уровень 1</h3>
+                    <p class="text-sm text-gray-400">Врата познания</p>
+                    <div class="mt-2 text-xs text-yellow-400" id="status-1">Доступно</div>
+                </div>
+            </div>
+            
+            <div id="level-2" class="quest-card p-4 rounded-lg cursor-pointer hover:scale-105 transition-transform opacity-50" onclick="startLevel(2)">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">🌙</div>
+                    <h3 class="font-russo text-lg text-emerald-400">Уровень 2</h3>
+                    <p class="text-sm text-gray-400">Лес выбора</p>
+                    <div class="mt-2 text-xs text-gray-500" id="status-2">Заблокировано</div>
+                </div>
+            </div>
+            
+            <div id="level-3" class="quest-card p-4 rounded-lg cursor-pointer hover:scale-105 transition-transform opacity-50" onclick="startLevel(3)">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">⭐</div>
+                    <h3 class="font-russo text-lg text-emerald-400">Уровень 3</h3>
+                    <p class="text-sm text-gray-400">Башня соответствий</p>
+                    <div class="mt-2 text-xs text-gray-500" id="status-3">Заблокировано</div>
+                </div>
+            </div>
+            
+            <div id="level-4" class="quest-card p-4 rounded-lg cursor-pointer hover:scale-105 transition-transform opacity-50" onclick="startLevel(4)">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">🔮</div>
+                    <h3 class="font-russo text-lg text-emerald-400">Уровень 4</h3>
+                    <p class="text-sm text-gray-400">Зал истин</p>
+                    <div class="mt-2 text-xs text-gray-500" id="status-4">Заблокировано</div>
+                </div>
+            </div>
+            
+            <div id="level-5" class="quest-card p-4 rounded-lg cursor-pointer hover:scale-105 transition-transform opacity-50" onclick="startLevel(5)">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">⚡</div>
+                    <h3 class="font-russo text-lg text-emerald-400">Уровень 5</h3>
+                    <p class="text-sm text-gray-400">Лаборатория ошибок</p>
+                    <div class="mt-2 text-xs text-gray-500" id="status-5">Заблокировано</div>
+                </div>
+            </div>
+            
+            <div id="level-6" class="quest-card p-4 rounded-lg cursor-pointer hover:scale-105 transition-transform opacity-50" onclick="startLevel(6)">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">👑</div>
+                    <h3 class="font-russo text-lg text-emerald-400">Уровень 6</h3>
+                    <p class="text-sm text-gray-400">Трон знаний</p>
+                    <div class="mt-2 text-xs text-gray-500" id="status-6">Заблокировано</div>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="showScreen('screen-title')" class="btn-mystic px-6 py-3 rounded-lg text-white">
+            ← Назад
+        </button>
+    </div>
+
+    <!-- ЭКРАН 3: Задание -->
+    <div id="screen-quest" class="screen">
+        <div class="w-full max-w-4xl">
+            <!-- Прогресс -->
+            <div class="mb-6">
+                <div class="flex justify-between mb-2">
+                    <span class="text-emerald-400 font-bold" id="level-title">Уровень 1</span>
+                    <span class="text-yellow-400" id="score-display">Очки: 0</span>
+                </div>
+                <div class="progress-container h-4 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="progress-bar h-full rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Контейнер задания -->
+            <div id="quest-container" class="quest-card p-6 md:p-8 rounded-lg">
+                <!-- Здесь будет динамически загружаться задание -->
+            </div>
+
+            <!-- Навигация -->
+            <div class="flex justify-between mt-6">
+                <button onclick="showScreen('screen-map')" class="btn-mystic px-6 py-3 rounded-lg text-white">
+                    ← Карта
+                </button>
+                <button id="check-btn" onclick="checkAnswer()" class="btn-gold px-8 py-3 rounded-lg text-white font-bold">
+                    Проверить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ЭКРАН 4: Финал -->
+    <div id="screen-final" class="screen">
+        <div class="text-center animate-fadeIn">
+            <h1 class="font-russo text-5xl md:text-6xl mb-6 neon-gold text-yellow-400">
+                ПОЗДРАВЛЯЕМ!
+            </h1>
+            <div class="mb-8">
+                <canvas id="finalCanvas" width="400" height="400" class="mx-auto mb-6"></canvas>
+            </div>
+            <div class="quest-card p-8 rounded-lg max-w-2xl mx-auto mb-8">
+                <h2 class="font-russo text-3xl text-emerald-400 mb-4">Ты прошёл все испытания!</h2>
+                <p class="text-xl mb-4">Итоговый результат: <span id="final-score" class="text-yellow-400 font-bold">0</span>%</p>
+                <p id="final-message" class="text-lg text-gray-300"></p>
+            </div>
+            <button onclick="location.reload()" class="btn-mystic px-8 py-4 rounded-lg text-xl font-bold text-white animate-glow">
+                ИГРАТЬ СНОВА
+            </button>
+        </div>
+    </div>
+
+    <!-- Модальное окно награды -->
+    <div id="reward-modal" class="reward-modal">
+        <div class="reward-content rounded-lg max-w-md mx-4">
+            <div class="text-6xl mb-4 animate-float">✨</div>
+            <h3 class="font-russo text-2xl text-yellow-400 mb-4">Отлично!</h3>
+            <p id="reward-text" class="text-lg mb-6">Ты справился с заданием!</p>
+            <button onclick="closeReward()" class="btn-gold px-6 py-3 rounded-lg text-white font-bold">
+                Продолжить
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        let currentLevel = 1;
+        let currentQuestion = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let correctAnswers = 0;
+        let unlockedLevels = [1];
+        let currentAnswer = null;
+
+        // Данные заданий
+        const levels = {
+            1: {
+                title: "Врата познания",
+                questions: [
+                    {
+                        type: "choice",
+                        question: "Какой из перечисленных союзов является сочинительным?",
+                        options: ["потому что", "и", "чтобы", "если"],
+                        correct: 1,
+                        explanation: "Союз 'и' соединяет равноправные части предложения."
+                    },
+                    {
+                        type: "input",
+                        question: "Вставь пропущенный союз: 'Он не пришёл, ___ заболел.'",
+                        correct: "потому что",
+                        alternatives: ["так как"],
+                        explanation: "Подчинительный союз причины."
+                    }
+                ]
+            },
+            2: {
+                title: "Лес выбора",
+                questions: [
+                    {
+                        type: "truefalse",
+                        question: "Союз 'а' всегда является противительным сочинительным союзом.",
+                        correct: true,
+                        explanation: "Союз 'а' выражает противопоставление."
+                    },
+                    {
+                        type: "choice",
+                        question: "Выбери предложение с подчинительным союзом:",
+                        options: [
+                            "Мы пошли в лес, и там было красиво.",
+                            "Когда наступила осень, листья пожелтели.",
+                            "Он читал книгу, а она слушала музыку.",
+                            "Ни ветер, ни дождь не могли нас остановить."
+                        ],
+                        correct: 1,
+                        explanation: "'Когда' - подчинительный союз времени."
+                    }
+                ]
+            },
+            3: {
+                title: "Башня соответствий",
+                questions: [
+                    {
+                        type: "match",
+                        question: "Установи соответствие между союзами и их разрядами:",
+                        pairs: [
+                            { left: "и, да, тоже", right: "соединительные" },
+                            { left: "но, а, зато", right: "противительные" },
+                            { left: "или, либо, то...то", right: "разделительные" }
+                        ],
+                        explanation: "Сочинительные союзы делятся на три разряда."
+                    }
+                ]
+            },
+            4: {
+                title: "Зал истин",
+                questions: [
+                    {
+                        type: "order",
+                        question: "Расставь части сложноподчинённого предложения в правильном порядке:",
+                        items: ["когда мы пришли домой", "уже стемнело", ","],
+                        correctOrder: [1, 0, 2],
+                        explanation: "Придаточное времени может стоять перед главным."
+                    },
+                    {
+                        type: "fixerror",
+                        question: "Найди и исправь ошибку в употреблении союза:",
+                        sentence: "Он хотел пойти гулять, но потому что шёл дождь.",
+                        correct: "Он хотел пойти гулять, но шёл дождь.",
+                        alternatives: ["Он не пошёл гулять, потому что шёл дождь."],
+                        explanation: "Нельзя одновременно использовать сочинительный и подчинительный союзы."
+                    }
+                ]
+            },
+            5: {
+                title: "Лаборатория ошибок",
+                questions: [
+                    {
+                        type: "open",
+                        question: "Объясни, чем отличается сочинительная связь от подчинительной (2-3 предложения):",
+                        keywords: ["равноправ", "зависим", "главн", "придаточн"],
+                        explanation: "При сочинительной связи части равноправны, при подчинительной - одна зависит от другой."
+                    },
+                    {
+                        type: "punctuation",
+                        question: "Расставь знаки препинания: 'Если бы я знал об этом заранее я бы подготовился лучше'",
+                        correct: "Если бы я знал об этом заранее, я бы подготовился лучше.",
+                        explanation: "Придаточное условие отделяется запятой от главного."
+                    }
+                ]
+            },
+            6: {
+                title: "Трон знаний",
+                questions: [
+                    {
+                        type: "choice",
+                        question: "В каком предложении союз 'как' является сравнительным?",
+                        options: [
+                            "Я знаю, как это сделать.",
+                            "Он силён, как медведь.",
+                            "Расскажи, как ты туда попал.",
+                            "Все видели, как он упал."
+                        ],
+                        correct: 1,
+                        explanation: "В этом случае 'как' вводит сравнительный оборот."
+                    },
+                    {
+                        type: "input",
+                        question: "Запиши любой подчинительный союз цели:",
+                        correct: "чтобы",
+                        alternatives: ["для того чтобы", "затем чтобы", "с тем чтобы"],
+                        explanation: "Союзы цели отвечают на вопрос 'зачем?'"
+                    }
+                ]
+            }
+        };
+
+        // Инициализация частиц
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 4 + 's';
+                particle.style.opacity = Math.random() * 0.5 + 0.2;
+                container.appendChild(particle);
+            }
+        }
+
+        // Переключение экранов
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Начало уровня
+        function startLevel(level) {
+            if (!unlockedLevels.includes(level)) {
+                alert('Этот уровень ещё заблокирован!');
+                return;
+            }
+            
+            currentLevel = level;
+            currentQuestion = 0;
+            showScreen('screen-quest');
+            loadQuestion();
+        }
+
+        // Загрузка вопроса
+        function loadQuestion() {
+            const level = levels[currentLevel];
+            const question = level.questions[currentQuestion];
+            const container = document.getElementById('quest-container');
+            
+            document.getElementById('level-title').textContent = `Уровень ${currentLevel}: ${level.title}`;
+            updateProgress();
+            
+            let html = `<h3 class="font-russo text-2xl text-emerald-400 mb-6">${question.question}</h3>`;
+            
+            switch(question.type) {
+                case 'choice':
+                    html += renderChoiceQuestion(question);
+                    break;
+                case 'input':
+                    html += renderInputQuestion(question);
+                    break;
+                case 'truefalse':
+                    html += renderTrueFalseQuestion(question);
+                    break;
+                case 'match':
+                    html += renderMatchQuestion(question);
+                    break;
+                case 'order':
+                    html += renderOrderQuestion(question);
+                    break;
+                case 'fixerror':
+                    html += renderFixErrorQuestion(question);
+                    break;
+                case 'open':
+                    html += renderOpenQuestion(question);
+                    break;
+                case 'punctuation':
+                    html += renderPunctuationQuestion(question);
+                    break;
+            }
+            
+            container.innerHTML = html;
+            currentAnswer = null;
+        }
+
+        // Рендер различных типов вопросов
+        function renderChoiceQuestion(question) {
+            let html = '<div class="space-y-3">';
+            question.options.forEach((option, index) => {
+                html += `
+                    <button class="option-btn w-full text-left rounded-lg text-white" 
+                            onclick="selectOption(${index})" data-index="${index}">
+                        ${option}
+                    </button>
+                `;
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function renderInputQuestion(question) {
+            return `
+                <input type="text" id="answer-input" class="w-full rounded-lg" 
+                       placeholder="Введите ответ..." onkeyup="handleInput(event)">
+                <p class="text-sm text-gray-400 mt-2">Введите правильный союз или словосочетание</p>
+            `;
+        }
+
+        function renderTrueFalseQuestion(question) {
+            return `
+                <div class="space-y-3">
+                    <button class="option-btn w-full rounded-lg text-white" onclick="selectTrueFalse(true)">
+                        ✓ Верно
+                    </button>
+                    <button class="option-btn w-full rounded-lg text-white" onclick="selectTrueFalse(false)">
+                        ✗ Неверно
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderMatchQuestion(question) {
+            let html = '<div class="grid grid-cols-2 gap-4">';
+            html += '<div><h4 class="text-emerald-400 mb-2">Союзы:</h4>';
+            question.pairs.forEach((pair, index) => {
+                html += `<div class="draggable-item rounded" draggable="true" data-index="${index}">${pair.left}</div>`;
+            });
+            html += '</div><div><h4 class="text-emerald-400 mb-2">Разряды:</h4>';
+            question.pairs.forEach((pair, index) => {
+                html += `<div class="drop-zone rounded" data-correct="${index}">${pair.right}</div>`;
+            });
+            html += '</div></div>';
+            setTimeout(initDragAndDrop, 100);
+            return html;
+        }
+
+        function renderOrderQuestion(question) {
+            let html = '<div class="space-y-2 mb-4">';
+            question.items.forEach((item, index) => {
+                html += `<div class="draggable-item rounded text-center" draggable="true" data-order="${index}">${item}</div>`;
+            });
+            html += '</div><div id="order-result" class="quest-card p-4 rounded-lg min-h-[60px] flex items-center justify-center"><span class="text-gray-400">Перетащите элементы в правильном порядке</span></div>';
+            setTimeout(initDragAndDrop, 100);
+            return html;
+        }
+
+        function renderFixErrorQuestion(question) {
+            return `
+                <div class="bg-black bg-opacity-30 p-4 rounded-lg mb-4">
+                    <p class="text-lg">${question.sentence}</p>
+                </div>
+                <input type="text" id="fix-input" class="w-full rounded-lg" 
+                       placeholder="Введите исправленное предложение...">
+            `;
+        }
+
+        function renderOpenQuestion(question) {
+            return `
+                <textarea id="open-answer" class="w-full rounded-lg bg-black bg-opacity-30 text-white p-3" 
+                          rows="4" placeholder="Введите ваш ответ..."></textarea>
+                <p class="text-sm text-gray-400 mt-2">Ответ должен содержать ключевые слова</p>
+            `;
+        }
+
+        function renderPunctuationQuestion(question) {
+            return `
+                <div class="bg-black bg-opacity-30 p-4 rounded-lg mb-4">
+                    <p class="text-lg">${question.question.split(':')[1]}</p>
+                </div>
+                <input type="text" id="punct-input" class="w-full rounded-lg" 
+                       placeholder="Введите предложение с расставленными знаками...">
+            `;
+        }
+
+        // Обработчики событий
+        function selectOption(index) {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            currentAnswer = index;
+        }
+
+        function selectTrueFalse(value) {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            currentAnswer = value;
+        }
+
+        function handleInput(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        }
+
+        // Drag and Drop функциональность
+        function initDragAndDrop() {
+            const draggables = document.querySelectorAll('[draggable="true"]');
+            const dropZones = document.querySelectorAll('.drop-zone, #order-result');
+            
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', draggable.dataset.index || draggable.dataset.order);
+                    draggable.style.opacity = '0.5';
+                });
+                
+                draggable.addEventListener('dragend', () => {
+                    draggable.style.opacity = '1';
+                });
+            });
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+                
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const data = e.dataTransfer.getData('text/plain');
+                    const draggedElement = document.querySelector(`[data-index="${data}"], [data-order="${data}"]`);
+                    
+                    if (zone.id === 'order-result') {
+                        if (!zone.querySelector('.draggable-item')) {
+                            zone.innerHTML = '';
+                        }
+                        zone.appendChild(draggedElement.cloneNode(true));
+                    } else {
+                        zone.innerHTML = draggedElement.textContent;
+                        zone.dataset.selected = data;
+                    }
+                });
+            });
+        }
+
+        // Проверка ответа
+        function checkAnswer() {
+            const level = levels[currentLevel];
+            const question = level.questions[currentQuestion];
+            let isCorrect = false;
+            
+            switch(question.type) {
+                case 'choice':
+                    isCorrect = currentAnswer === question.correct;
+                    break;
+                case 'input':
+                    const input = document.getElementById('answer-input');
+                    if (input) {
+                        const answer = input.value.toLowerCase().trim();
+                        isCorrect = answer === question.correct.toLowerCase() || 
+                                   (question.alternatives && question.alternatives.some(alt => alt.toLowerCase() === answer));
+                    }
+                    break;
+                case 'truefalse':
+                    isCorrect = currentAnswer === question.correct;
+                    break;
+                case 'match':
+                    const zones = document.querySelectorAll('.drop-zone');
+                    let correctMatches = 0;
+                    zones.forEach(zone => {
+                        if (zone.dataset.selected === zone.dataset.correct) {
+                            correctMatches++;
+                        }
+                    });
+                    isCorrect = correctMatches === question.pairs.length;
+                    break;
+                case 'order':
+                    const resultZone = document.getElementById('order-result');
+                    if (resultZone && resultZone.children.length > 0) {
+                        const userOrder = Array.from(resultZone.children).map(child => parseInt(child.dataset.order));
+                        isCorrect = JSON.stringify(userOrder) === JSON.stringify(question.correctOrder);
+                    }
+                    break;
+                case 'fixerror':
+                    const fixInput = document.getElementById('fix-input');
+                    if (fixInput) {
+                        const answer = fixInput.value.trim();
+                        isCorrect = answer === question.correct || 
+                                   (question.alternatives && question.alternatives.some(alt => alt === answer));
+                    }
+                    break;
+                case 'open':
+                    const openAnswer = document.getElementById('open-answer');
+                    if (openAnswer) {
+                        const answer = openAnswer.value.toLowerCase();
+                        const keywordCount = question.keywords.filter(keyword => 
+                            answer.includes(keyword.toLowerCase())
+                        ).length;
+                        isCorrect = keywordCount >= 2;
+                    }
+                    break;
+                case 'punctuation':
+                    const punctInput = document.getElementById('punct-input');
+                    if (punctInput) {
+                        const answer = punctInput.value.trim();
+                        isCorrect = answer === question.correct;
+                    }
+                    break;
+            }
+            
+            totalQuestions++;
+            if (isCorrect) {
+                correctAnswers++;
+                score += 10;
+                showReward(question.explanation);
+            } else {
+                alert('Неправильно! Попробуй ещё раз.\n\nПодсказка: ' + question.explanation);
+            }
+            
+            document.getElementById('score-display').textContent = `Очки: ${score}`;
+        }
+
+        // Показ награды
+        function showReward(explanation) {
+            const modal = document.getElementById('reward-modal');
+            document.getElementById('reward-text').textContent = explanation || 'Отличная работа!';
+            modal.classList.add('active');
+            
+            // Разблокировка следующего уровня
+            if (currentQuestion < levels[currentLevel].questions.length - 1) {
+                currentQuestion++;
+                setTimeout(() => {
+                    closeReward();
+                    loadQuestion();
+                }, 2000);
+            } else {
+                // Уровень пройден
+                if (currentLevel < 6) {
+                    unlockedLevels.push(currentLevel + 1);
+                    updateMapStatus();
+                }
+                setTimeout(() => {
+                    closeReward();
+                    if (currentLevel === 6) {
+                        showFinal();
+                    } else {
+                        showScreen('screen-map');
+                    }
+                }, 2000);
+            }
+        }
+
+        function closeReward() {
+            document.getElementById('reward-modal').classList.remove('active');
+        }
+
+        // Обновление статуса карты
+        function updateMapStatus() {
+            unlockedLevels.forEach(level => {
+                const statusEl = document.getElementById(`status-${level}`);
+                const levelEl = document.getElementById(`level-${level}`);
+                if (statusEl) {
+                    statusEl.textContent = '✓ Пройдено';
+                    statusEl.className = 'mt-2 text-xs text-green-400';
+                }
+                if (levelEl) {
+                    levelEl.classList.remove('opacity-50');
+                }
+            });
+            
+            // Разблокировка доступных уровней
+            for (let i = 1; i <= 6; i++) {
+                if (unlockedLevels.includes(i) || unlockedLevels.includes(i - 1)) {
+                    const levelEl = document.getElementById(`level-${i}`);
+                    if (levelEl) {
+                        levelEl.classList.remove('opacity-50');
+                    }
+                }
+            }
+        }
+
+        // Обновление прогресса
+        function updateProgress() {
+            const level = levels[currentLevel];
+            const progress = ((currentQuestion) / level.questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        // Финальный экран
+        function showFinal() {
+            showScreen('screen-final');
+            const percentage = Math.round((correctAnswers / totalQuestions) * 100) || 0;
+            document.getElementById('final-score').textContent = percentage;
+            
+            let message = '';
+            if (percentage >= 90) {
+                message = 'Превосходно! Ты настоящий мастер союзов!';
+            } else if (percentage >= 70) {
+                message = 'Хороший результат! Есть небольшие пробелы, но в целом отлично!';
+            } else if (percentage >= 50) {
+                message = 'Неплохо, но стоит повторить материал о союзах.';
+            } else {
+                message = 'Рекомендуем изучить тему союзов более внимательно.';
+            }
+            document.getElementById('final-message').textContent = message;
+            
+            // Анимация на canvas
+            animateFinalCanvas(percentage);
+        }
+
+        // Canvas анимация
+        function animateFinalCanvas(percentage) {
+            const canvas = document.getElementById('finalCanvas');
+            const ctx = canvas.getContext('2d');
+            let frame = 0;
+            
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Фоновый градиент
+                const gradient = ctx.createRadialGradient(200, 200, 0, 200, 200, 200);
+                gradient.addColorStop(0, '#064e3b');
+                gradient.addColorStop(1, '#0a0a0a');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Магические частицы
+                for (let i = 0; i < 20; i++) {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    const size = Math.random() * 3 + 1;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(16, 185, 129, ${Math.random() * 0.5 + 0.2})`;
+                    ctx.fill();
+                }
+                
+                // Центральный символ
+                ctx.save();
+                ctx.translate(200, 200);
+                ctx.rotate(frame * 0.02);
+                
+                // Корона знаний
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.moveTo(-60, -20);
+                ctx.lineTo(-40, -60);
+                ctx.lineTo(-20, -30);
+                ctx.lineTo(0, -70);
+                ctx.lineTo(20, -30);
+                ctx.lineTo(40, -60);
+                ctx.lineTo(60, -20);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.restore();
+                
+                // Текст процента
+                ctx.fillStyle = '#fbbf24';
+                ctx.font = 'bold 48px Russo One';
+                ctx.textAlign = 'center';
+                ctx.fillText(percentage + '%', 200, 280);
+                
+                frame++;
+                requestAnimationFrame(draw);
+            }
+            
+            draw();
+        }
+
+        // Инициализация игры
+        window.onload = function() {
+            createParticles();
+        };
+    </script>
+</body>
+</html>'''
+
+with open('/tmp/soyuz_quest.html', 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print("Файл создан успешно!")
+print(f"Размер файла: {len(html_content)} символов")
+
+ # Result 
+Файл создан успешно!
+Размер файла: 40730 символов
